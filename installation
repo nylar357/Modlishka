@@ -1,0 +1,91 @@
+source https://www.crackitdown.com/2019/02/modlishka-kali-linux.html?m=1
+We all try to secure our online accounts as much as we can. We turn on Two-factor Authentication on our Facebook account or Gmail account etc. and we think that now we're fully secure.
+
+
+But the tool we're going to discuss here will wipe out this concept.
+Modlishka. A reverse proxy automat phishing tool which is recently released on Github. The tool is written in Goproman language and. the most powerful and dangerous tool ever which can take Phishing to the next level. This tool can easily bypass Two-Factor authentication running on Gmail, Yahoo mail, Proton mail etc services and grab the username, passwords, and authentication token.`
+The best things about this tool are- We do not require templates for phishing websites. Normally we need to clone websites in order to do phishing but in case of Modlishka, it doesn't require because it works on the reverse proxy so that the target website open live. You will not even realize this for a moment that the website is fake.
+It also has full control over origin TLS traffic flow. This tool is very flexible and it has lots of options for configuration. Beside these, it has a control panel where the captured tokens, usernames, passwords are stored and later they can be used for a web session.
+The only disadvantage of this tool is, it doesn't work on Universal Two-Factor Authentication because this authentication uses special USB or NFC devices to authenticate.
+How Modlishka Works
+
+
+Modlishka works on both Social Engineering and Man-In-The-Middle attack technique. The Modlishka server is set up between the Victim and the target website which works as a proxy for the target website. Every request sent or received between the victim and the target website will go through Modlishk server.
+This setup captures the victim's username, password, site authentication token, the session created between them, cookies and requests are and later these things can be used to create a web session.
+The victim will not even realize for a moment that his/her account was hacked. That is why Modlishka is reported as very dangerous.
+Setup Modlishka in Kali Linux
+
+
+Fire up your Kali Linux machine and download the tool from Github. You need Go language installed in your machine and if you don't have, simply apply the command apt-get install golang. This command will install the Go language.
+Now we need to set our GOPATH. Apply the command-
+
+export GOPATH=$HOME/go
+
+To check the path apply the command echo $GOPATH. Now we need to download Modlishka to the go folder. We are applying the command-
+
+go get -u github.com/drk1wi/Modlishka
+
+This command will download the Modlishka tool to the go folder. Now change the directory to the go folder.
+
+cd /root/go/src/github.com/drk1wi/Modlishka/
+
+ In the next step, we need to configure the SSL certificate. If you have a registered domain and SSL certificate, you can use them here. First of all, we are generating an RSA private key.
+
+openssl genrsa -out MyCA.key 2048
+
+￼
+You can name the key as you want. In the next, we need to generate the SSL certificate.
+
+openssl req -x509 -new -nodes -key MyCA.key -sha256 -days 1024 -out MyCA.pem
+
+￼
+In the information field section, you can fill according to you and similar to the domain you want to do phishing. Now we have to set both the Key and certificate in the Autocertificate file. Open the certificate in the leafpad and copy it.
+
+leafpad MyCA.pem/
+
+Now open the Autocertificate file with the command given below. Find for the line CA CERT= 'PASTE YOUR CA CERT HERE'. Delete the sentence that is between the inverted commas and paste the certificate.
+
+nano plugin/autocert.go
+
+Save and close the file. Now open the RSA private key with leafpad and copy the Key.
+
+leafpad MyCA.key
+
+
+Now again open the Autocert file and find for the line CA CERT KEY= 'PASTE YOUR CA CERT KEY HERE'. Delete the sentence from between the inverted commas and paste the key and save and close the file.
+The next step is compiling the file. We will apply the command 'make' and the file will be compiled.
+Congrats! the tool is properly configured and now we can use the tool.
+Initiate The Process of The Tool
+Let's check what options we can use here.
+
+./dist/proxy -h
+
+ This command will show all the available options we can use. You can also set up a new configuration file in order to point your custom phishing domain. Use the following command to open the default configuration file.
+
+nano templates/google.com_gsuite.json
+
+￼
+Here you can set your custom information to point your custom domain. But before that you need to configure your domain to point Modlishka server.
+Before running the tool we neeto import the SSL certificate to the browser. If we don't do that it will show unsecured connection because we've generated a custom SSL certificate and we are on the localhost. To import it on Mozilla Firefox go to  
+
+
+Advanced>Certificates>View Certificates>Import. 
+
+If you configure a registered domain with Modlishka then you don't need to import custom SSL certificate you will get a genuine SSL certificate. 
+Now we are free to start the Modlishka server. Load the default config file if you didn't set your own. Use the command-
+
+
+./dist/proxy -config templates/google.com_gsuite.json
+
+￼
+
+
+Here you can see we got the URL- https://loopback.modlishka.io and it will open up google.com.
+To see the captured details, simply give the command-
+
+
+leafpad google.log
+
+Conclusion
+Doing setup of this tool is very easy and anybody can do this and it raises the hazard. You need to be a little careful to avoid damages by this tool.
+Don't open any unknown or malicious link shared on Whatsapp or any Social Media or other sources. Check the links who ask you to enter username and password because attackers can use homograph to trick you. If you don't know what is homograph, here is a simple example-
